@@ -27,7 +27,7 @@
   flex-direction: row;
   flex-wrap: wrap-reverse;
   position: relative;
-  border: 1px red solid;
+  border: 0px transparent solid;
   padding: 0;
   margin: 0;
 }
@@ -44,7 +44,7 @@
   box-sizing: border-box;
   width: 10%;
   height: 10%;
-  border: 0.1px red solid;
+  border: 0px red solid;
   flex-direction: row;
   position: relative;
   /* aspect-ratio: 1; */
@@ -54,7 +54,7 @@
   position: absolute;
   width: 35%;
   height: 35%;
-  border:3px solid white;
+  border: 3px solid white;
   z-index: 100;
   border-radius: 50px;
 }
@@ -65,7 +65,7 @@
   flex-direction: row;
   width: 50vw;
 }
-.dice{
+.dice {
   display: flex;
   gap: 8px;
 }
@@ -76,5 +76,10 @@
   }
   .DicesWrapper {
     width: 90vw;
+  }
+  .player {
+    position: absolute;
+    width: 30%;
+    height: 30%;
   }
 }

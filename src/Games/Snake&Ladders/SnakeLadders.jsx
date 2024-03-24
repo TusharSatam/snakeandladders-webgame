@@ -143,7 +143,7 @@ const SnakeLadders = () => {
         newPosition < originalPosition
       ) {
         console.log("Player got bitten by a snake!");
-        playSound("SnakeBite");
+        playSound("snakeBite");
         const bittenPlayerColor = currentPlayerIndex === 0 ? "green" : "red";
         // handleSnakeBite(newPosition, bittenPlayerColor);
       }
@@ -165,7 +165,7 @@ const SnakeLadders = () => {
         console.log(`Player ${playerNames[winningPlayerIndex]} wins!`);
         // Declare the winning player
         setWinner(winningPlayerIndex);
-        // playSound('Success');
+        playSound('success');
       } else {
         // Check if the player rolled a 6 or climbed a ladder
         if (diceValue === 6 || newPosition > originalPosition) {
