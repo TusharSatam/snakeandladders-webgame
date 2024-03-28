@@ -58,6 +58,12 @@ const SnakeLadders = () => {
 
   // Inside the SnakeLadders component
   const handleDiceRolling = async (user) => {
+    if (user === "green") {
+      setisDice1Rolling(true);
+    } else {
+      setisDice2Rolling(true);
+    }
+    console.log("START RollDice");
     setPlayerTimer(30);
     socket.emit("rollDice", { user, roomNumber });
   };
@@ -117,7 +123,7 @@ const SnakeLadders = () => {
     if (currentPosition >= 95 && diceValue > remainingSteps) {
       console.log("Player is frozen. Skipping turn.");
       // Player is frozen, do not move
-      setCurrentPlayerIndex((currentPlayerIndex + 1) % playerPositions.length);
+      updateCurrentPlayerIndex((currentPlayerIndex + 1) % playerPositions.length,roomNumber);
     } else {
       // Proceed with normal movement logic
       let newPosition = currentPosition + diceValue;
@@ -293,7 +299,6 @@ const SnakeLadders = () => {
       isOpponentFound &&
       winner === null
     ) {
-      console.log("in timer");
       countDownTime = setInterval(() => {
         setCountDown((prevTimer) => prevTimer - 1);
       }, 1000);
@@ -344,14 +349,7 @@ const SnakeLadders = () => {
         console.log(
           `${user} rolled the dice , Dice:${diceValue} , currentPlayerIndex: ${currentPlayerIndex} , roomNumber : ${roomNumber}`
         );
-        if (user === "green") {
-          setisDice1Rolling(true);
-          console.log("Green");
-        } else {
-          setisDice2Rolling(true);
-          console.log("RED");
-        }
-        console.log("START RollDice");
+
         // Update game state based on the dice roll
         rollDice(
           user,
@@ -383,6 +381,7 @@ const SnakeLadders = () => {
   }, []);
 
   const handleSearchOpponent = () => {
+
     setIsSearching(true);
     // Emit 'searchOpponent' event to the server
     socket.emit("searchOpponent");
@@ -435,7 +434,7 @@ const SnakeLadders = () => {
               currentPlayerIndex !== 0 ||
               isDice2Rolling ||
               isDice1Rolling ||
-              playColor === "red"
+              playColor!=="green"
             }
             className={styles.dice}
           >
@@ -465,7 +464,7 @@ const SnakeLadders = () => {
               currentPlayerIndex !== 1 ||
               isDice1Rolling ||
               isDice2Rolling ||
-              playColor === "green"
+              playColor!=="red"
             }
             className={styles.dice}
           >
