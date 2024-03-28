@@ -13,7 +13,7 @@ import successSound from "./assets/sounds/success.mp3";
 import styles from "./SnakeLadders.module.css";
 import io from "socket.io-client";
 
-const socket = io("http://localhost:4000");
+const socket = io("https://snakeandladders-webgame-be.onrender.com/");
 const SnakeLadders = () => {
   const [playerPositions, setPlayerPositions] = useState([1, 1]);
   const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
