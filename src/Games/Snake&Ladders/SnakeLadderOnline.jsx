@@ -391,7 +391,7 @@ const SnakeLadders = () => {
   // -------------------------------------------------------
   return (
     <div className={styles.container}>
-      <div>{roomId && `You are in room: ${roomId}`}</div>
+      {/* <div>{roomId && `You are in room: ${roomId}`}</div> */}
       {isOpponentFound && (
         <div className={styles.boardWrapper}>
           <div className={styles.backgroundImg}></div>
