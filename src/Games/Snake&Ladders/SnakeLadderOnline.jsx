@@ -21,6 +21,7 @@ const SnakeLadders = () => {
   const [dice2Value, setDice2Value] = useState(6);
   const [isDice1Rolling, setisDice1Rolling] = useState(false);
   const [isDice2Rolling, setisDice2Rolling] = useState(false);
+  const [playColor, setplayColor] = useState("green");
   const [count, setcount] = useState(0);
   // Add state variables to hold the position and color of the player who got bitten
   const [snakeBitePosition, setSnakeBitePosition] = useState(null);
@@ -30,6 +31,8 @@ const SnakeLadders = () => {
   const [winner, setWinner] = useState(null);
   const [isSearching, setIsSearching] = useState(false);
   const [isOpponentFound, setIsOpponentFound] = useState(false);
+  const [playerTimer, setPlayerTimer] = useState(0);
+  const [CountDown, setCountDown] = useState(0);
   const playerColors = ["green", "red"];
   const playerNames = ["Green", "Red"];
   const diceSide = [
@@ -55,17 +58,8 @@ const SnakeLadders = () => {
 
   // Inside the SnakeLadders component
   const handleDiceRolling = async (user) => {
+    setPlayerTimer(30);
     socket.emit("rollDice", { user, roomNumber });
-    // if (user === "green") {
-    //   setisDice1Rolling(true);
-    //   console.log("Green");
-    // } else {
-    //   setisDice2Rolling(true);
-    //   console.log("RED");
-    // }
-    // console.log("START RollDice");
-
-    // await rollDice(user); // Properly await rollDice function
   };
 
   // todo: BUG: after a few seconds of playing  the dice logic stops working correctly
@@ -84,6 +78,7 @@ const SnakeLadders = () => {
       return; // Don't roll dice if winner is declared
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
+    setCountDown(30);
     // const diceValue = Math.floor(Math.random() * 6) + 1;
 
     // setcount((prev) => prev + 1);
@@ -181,6 +176,9 @@ const SnakeLadders = () => {
         console.log(`Player ${playerNames[winningPlayerIndex]} wins!`);
         // Declare the winning player
         setWinner(winningPlayerIndex);
+        setPlayerTimer(0);
+        setCountDown(0);
+        socket.emit("gameOver", roomNumber);
         playSound("success");
       } else {
         // Check if the player rolled a 6 or climbed a ladder
@@ -234,6 +232,9 @@ const SnakeLadders = () => {
     setDice1Value(6);
     setDice2Value(6);
     setWinner(null);
+    setRoomNumber(null);
+    setIsSearching(false);
+    setIsOpponentFound(false);
   };
 
   // Generate numbers from 100 to 1, with every second row reversed
@@ -267,9 +268,50 @@ const SnakeLadders = () => {
     socket.emit("updateCurrentPlayerIndex", { index, roomNumber });
   };
   useEffect(() => {
+    // Timer logic
+    let timer;
+    if (playerTimer > 0 && currentPlayerIndex !== null) {
+      timer = setTimeout(() => {
+        // Declare the opponent as the winner when timer runs out
+        const opponentIndex = currentPlayerIndex === 0 ? 1 : 0;
+        setWinner(opponentIndex);
+        socket.emit("gameOver", roomNumber);
+        playSound("success");
+      }, playerTimer * 1000);
+    }
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [playerTimer, currentPlayerIndex, roomNumber]);
+
+  useEffect(() => {
+    let countDownTime;
+    if (
+      CountDown > 0 &&
+      currentPlayerIndex !== null &&
+      isOpponentFound &&
+      winner === null
+    ) {
+      console.log("in timer");
+      countDownTime = setInterval(() => {
+        setCountDown((prevTimer) => prevTimer - 1);
+      }, 1000);
+    } else {
+      clearInterval(countDownTime); // Clear the interval if conditions are not met
+    }
+    return () => {
+      clearInterval(countDownTime); // Clear the interval in cleanup
+    };
+  }, [CountDown, currentPlayerIndex, roomNumber]);
+
+  useEffect(() => {
     // Listen for 'find' event from the server
     socket.on("opponentFound", () => {
       setIsSearching(false);
+      setCountDown(30);
+      console.log(CountDown);
+      setPlayerTimer(30);
       setIsOpponentFound(true);
     });
 
@@ -281,6 +323,9 @@ const SnakeLadders = () => {
     // Listen for the roomNumber event from the server
     socket.on("roomNumber", (roomNumber) => {
       setRoomNumber(roomNumber);
+    });
+    socket.on("playerColor", (color) => {
+      setplayColor(color);
     });
     socket.on("updatedPositions", (updatedPositions) => {
       console.log(updatedPositions);
@@ -382,12 +427,15 @@ const SnakeLadders = () => {
           {isSearching ? "Searching..." : "Search Opponent"}
         </button>
       )}
-      {winner === null && (
+      {winner === null && isOpponentFound && (
         <div className={styles.DicesWrapper}>
           <button
             onClick={() => handleDiceRolling("green")}
             disabled={
-              currentPlayerIndex !== 0 || isDice2Rolling || isDice1Rolling
+              currentPlayerIndex !== 0 ||
+              isDice2Rolling ||
+              isDice1Rolling ||
+              playColor === "red"
             }
             className={styles.dice}
           >
@@ -409,11 +457,15 @@ const SnakeLadders = () => {
             ) : (
               <img style={{ width: 34, height: 34 }} src={Dice} />
             )}
+            <h4>{currentPlayerIndex === 0 ? CountDown : 30}</h4>
           </button>
           <button
             onClick={() => handleDiceRolling("red")}
             disabled={
-              currentPlayerIndex !== 1 || isDice1Rolling || isDice2Rolling
+              currentPlayerIndex !== 1 ||
+              isDice1Rolling ||
+              isDice2Rolling ||
+              playColor === "green"
             }
             className={styles.dice}
           >
@@ -435,6 +487,7 @@ const SnakeLadders = () => {
             ) : (
               <img style={{ width: 34, height: 34 }} src={Dice} />
             )}
+            <h4>{currentPlayerIndex === 1 ? CountDown : 30}</h4>
           </button>
         </div>
       )}

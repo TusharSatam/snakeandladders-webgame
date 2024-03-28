@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import SnakeLadders from "./Games/Snake&Ladders/SnakeLadders";
+import SnakeLadders from "./Games/Snake&Ladders/SnakeLadderOnline";
 
 function App() {
   return (
